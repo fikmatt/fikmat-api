@@ -8,15 +8,14 @@ const http = require('http');
 const server = http.createServer(app);
 const port = process.env.PORT || '8020'
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Fikmat API is running.');
 })
 
-require('coffeescript/register')
-const api = require('./lib/api.coffee')
+require('coffeescript/register');
+const api = require('./lib/api.coffee');
 
 api.on('ready', () => {
   server.listen(port, () => {

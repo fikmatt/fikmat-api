@@ -1,6 +1,8 @@
 johnny = require('johnny-five')
 pixel = require('node-pixel')
 
+Utils = require('./utils')
+
 class Api
   constructor: ->
     self = @
@@ -35,7 +37,7 @@ class Api
       else
         for i in [0...@led_strip_length]
           if body.led[i]
-            color = body.led[i]
+            color = Utils.safeColorFromString(body.led[i])
           else
             color = [0, 0, 0]
 

@@ -10,6 +10,13 @@ const port = process.env.PORT || '8020'
 
 app.use(express.json());
 
+const rateLimit = require("express-rate-limit")
+const limiter = rateLimit({
+  windowMs: 1000 / 30,
+  max: 1
+});
+app.use(limiter);
+
 app.get('/', (req, res) => {
   res.send('Fikmat API is running.');
 })

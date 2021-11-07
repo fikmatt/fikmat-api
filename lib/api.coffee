@@ -4,51 +4,61 @@ pixel = require('node-pixel')
 Utils = require('./utils')
 
 class Api
+  LED_STRIP_LENGTH: 15
+  LED_STRIP_PIN: 6
+
   constructor: ->
     self = @
     @callbacks = {}
     @board = new (johnny.Board)(repl: false)
 
-    @led_strip_length = 15
-
     @board.on 'ready', ->
       self.board.info('Board', 'Ready')
 
-      self.led_strip = new (pixel.Strip)(
-        data: 6
-        length: self.led_strip_length
+      self.ledStrip = new (pixel.Strip)(
+        data: self.LED_STRIP_PIN
+        length: self.LED_STRIP_LENGTH
         color_order: pixel.COLOR_ORDER.GRB
-        board: this
+        board: self.board
         controller: 'FIRMATA'
+        gamma: 2.8
       )
 
-      self.led_strip.on 'ready', ->
+      self.ledStrip.on 'ready', ->
         self.board.info('LED strip', 'Ready')
 
-        self.runCallback 'ready'
+        self._runCallback 'ready'
 
     @board.on 'exit', ->
-        self.led_strip.off()
+        self.ledStrip.off()
 
-  post: (body) ->
-    if body.led
-      if body.led.length == 1
-        @led_strip.color(body.led[0])
-      else
-        for i in [0...@led_strip_length]
-          if body.led[i]
-            color = Utils.safeColorFromString(body.led[i])
-          else
-            color = [0, 0, 0]
-
-          @led_strip.pixel(i).color(color)
-
-      @led_strip.show()
+  post: (data) ->
+    if data.led
+      @_updateLedStripColors(data.led)
 
   on: (callback, func) ->
     @callbacks[callback] = func
 
-  runCallback: (callback) ->
+  _runCallback: (callback) ->
     @callbacks[callback].call()
+
+  _updateLedStripColors: (colors) ->
+    if colors.length == 1
+      c = Utils.safeColorFromString(colors[0])
+      @ledStrip.color(c)
+    else
+      segmentLength = @LED_STRIP_LENGTH / colors.length
+      isFloat = segmentLength % 1 != 0
+      segmentLength = Math.floor(segmentLength)
+      last = colors.length - 1
+
+      for color, i in colors
+        segmentLength += 1 if isFloat && i == last
+
+        for j in [0...segmentLength]
+          c = Utils.safeColorFromString(color)
+          @ledStrip.pixel(i * segmentLength + j).color(c)
+
+    @ledStrip.show()
 
 module.exports = new Api

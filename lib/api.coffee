@@ -6,6 +6,7 @@ Utils = require('./utils')
 class Api
   LED_STRIP_LENGTH: 15
   LED_STRIP_PIN: 6
+  MOTOR_PIN: 5
 
   constructor: ->
     self = @
@@ -14,6 +15,8 @@ class Api
 
     @board.on 'ready', ->
       self.board.info('Board', 'Ready')
+
+      self.motor = new (johnny.Motor)(self.MOTOR_PIN)
 
       self.ledStrip = new (pixel.Strip)(
         data: self.LED_STRIP_PIN
@@ -31,16 +34,32 @@ class Api
 
     @board.on 'exit', ->
         self.ledStrip.off()
+        self.motor.stop()
 
   post: (data) ->
-    if data.led
+    if data.led?
       @_updateLedStripColors(data.led)
+
+    if data.vibrate?
+      @_startMotor(data.vibrate)
 
   on: (callback, func) ->
     @callbacks[callback] = func
 
   _runCallback: (callback) ->
     @callbacks[callback].call()
+
+  _startMotor: (speed) ->
+    clearTimeout(@motorStopTimer)
+
+    speed = Number(speed) || 0
+    @motor.start(speed)
+
+    if speed > 0
+      self = @
+      @motorStopTimer = setTimeout ->
+        self.motor.stop()
+      , 150
 
   _updateLedStripColors: (colors) ->
     if colors.length == 1

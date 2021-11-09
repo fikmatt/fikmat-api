@@ -52,14 +52,22 @@ class Api
   _startMotor: (speed) ->
     clearTimeout(@motorStopTimer)
 
-    speed = Number(speed) || 0
+    speed = parseInt(speed) || 0
+
+    if speed == 0
+      @motor.stop()
+      return
+
+    # limit speed value, min 0, max 99
+    speed = Math.min(Math.max(speed, 0), 99)
+    # remap speed value to 0-255
+    speed = Math.round(Utils.mapRange(speed, 0, 99, 0, 255))
     @motor.start(speed)
 
-    if speed > 0
-      self = @
-      @motorStopTimer = setTimeout ->
-        self.motor.stop()
-      , 150
+    self = @
+    @motorStopTimer = setTimeout ->
+      self.motor.stop()
+    , 150
 
   _updateLedStripColors: (colors) ->
     return if colors.length == 0

@@ -65,20 +65,17 @@ class Api
     return if colors.length == 0
 
     if colors.length == 1
+      # only one color
       c = Utils.safeColorFromString(colors[0])
       @ledStrip.color(c)
     else
-      segmentLength = @LED_STRIP_LENGTH / colors.length
-      isFloat = segmentLength % 1 != 0
-      segmentLength = Math.floor(segmentLength)
-      last = colors.length - 1
-
+      # more colors, remap color values to led strip size
       for color, i in colors
-        segmentLength += 1 if isFloat && i == last
+        newPos = Math.floor(Utils.mapRange(i, 0, colors.length, 0, @LED_STRIP_LENGTH))
 
-        for j in [0...segmentLength]
+        for j in [0...@LED_STRIP_LENGTH / colors.length]
           c = Utils.safeColorFromString(color)
-          @ledStrip.pixel(i * segmentLength + j).color(c)
+          @ledStrip.pixel(newPos + j).color(c)
 
     @ledStrip.show()
 

@@ -62,6 +62,8 @@ class Api
       , 150
 
   _updateLedStripColors: (colors) ->
+    return if colors.length == 0
+
     if colors.length == 1
       c = Utils.safeColorFromString(colors[0])
       @ledStrip.color(c)

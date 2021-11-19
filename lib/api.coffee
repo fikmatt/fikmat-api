@@ -17,26 +17,29 @@ class Api
 
       self.motor = new (johnny.Motor)(self.MOTOR_PIN)
 
-      self.ledStrip = new (pixel.Strip)(
+      self.ledStrips = new (pixel.Strip)(
         board: self.board
         controller: "I2CBACKPACK"
         color_order: pixel.COLOR_ORDER.GRB
-        strips: [self.LED_STRIP_LENGTH]
+        strips: [self.LED_STRIP_LENGTH, self.LED_STRIP_LENGTH]
         gamma: 2.8
       )
 
-      self.ledStrip.on 'ready', ->
-        self.board.info('LED strip', 'Ready')
+      self.ledStrips.on 'ready', ->
+        self.board.info('LED strips', 'Ready')
 
         self._runCallback 'ready'
 
     @board.on 'exit', ->
-        self.ledStrip.off()
+        self.ledStrips.off()
         self.motor.stop()
 
   post: (data) ->
-    if data.led?
-      @_updateLedStripColors(data.led)
+    if data.led_right?
+      @_updateLedStripColors("right", data.led_right)
+
+    if data.led_left?
+      @_updateLedStripColors("left", data.led_left)
 
     if data.vibrate?
       @_startMotor(data.vibrate)
@@ -67,13 +70,18 @@ class Api
       self.motor.stop()
     , 150
 
-  _updateLedStripColors: (colors) ->
+  _updateLedStripColors: (position, colors) ->
     return if colors.length == 0
+
+    offset = switch position
+             when "left" then 0
+             when "right" then @LED_STRIP_LENGTH
 
     if colors.length == 1
       # only one color
       c = Utils.safeColorFromString(colors[0])
-      @ledStrip.color(c)
+      for j in [0...@LED_STRIP_LENGTH]
+        @ledStrips.pixel(offset + j).color(c)
     else
       # more colors, remap color values to led strip size
       for color, i in colors
@@ -81,8 +89,8 @@ class Api
 
         for j in [0...@LED_STRIP_LENGTH / colors.length]
           c = Utils.safeColorFromString(color)
-          @ledStrip.pixel(newPos + j).color(c)
+          @ledStrips.pixel(offset + newPos + j).color(c)
 
-    @ledStrip.show()
+    @ledStrips.show()
 
 module.exports = new Api

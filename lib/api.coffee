@@ -4,7 +4,9 @@ pixel = require('node-pixel')
 Utils = require('./utils')
 
 class Api
-  LED_STRIP_LENGTH: 15
+  LED_STRIP_FRONT_LENGTH: 10
+  LED_STRIP_BACK_LENGTH: 5
+  LED_STRIP_TOTAL_LENGTH: 10 + 5
   MOTOR_PIN: 5
 
   constructor: ->
@@ -21,7 +23,7 @@ class Api
         board: self.board
         controller: "I2CBACKPACK"
         color_order: pixel.COLOR_ORDER.GRB
-        strips: [self.LED_STRIP_LENGTH, self.LED_STRIP_LENGTH]
+        strips: [self.LED_STRIP_TOTAL_LENGTH, self.LED_STRIP_TOTAL_LENGTH]
         gamma: 2.8
       )
 
@@ -75,19 +77,27 @@ class Api
 
     offset = switch position
              when "left" then 0
-             when "right" then @LED_STRIP_LENGTH
+             when "right" then @LED_STRIP_TOTAL_LENGTH
 
     if colors.length == 1
       # only one color
       c = Utils.safeColorFromString(colors[0])
-      for j in [0...@LED_STRIP_LENGTH]
+      for j in [0...@LED_STRIP_TOTAL_LENGTH]
         @ledStrips.pixel(offset + j).color(c)
     else
       # more colors, remap color values to led strip size
       for color, i in colors
-        newPos = Math.floor(Utils.mapRange(i, 0, colors.length, 0, @LED_STRIP_LENGTH))
+        newPos = Math.floor(Utils.mapRange(i, 0, colors.length, 0, @LED_STRIP_FRONT_LENGTH))
 
-        for j in [0...@LED_STRIP_LENGTH / colors.length]
+        for j in [0...@LED_STRIP_FRONT_LENGTH / colors.length]
+          c = Utils.safeColorFromString(color)
+          @ledStrips.pixel(offset + newPos + j).color(c)
+
+      offset += @LED_STRIP_FRONT_LENGTH
+      for color, i in colors.reverse()
+        newPos = Math.floor(Utils.mapRange(i, 0, colors.length, 0, @LED_STRIP_BACK_LENGTH))
+
+        for j in [0...@LED_STRIP_BACK_LENGTH / colors.length]
           c = Utils.safeColorFromString(color)
           @ledStrips.pixel(offset + newPos + j).color(c)
 

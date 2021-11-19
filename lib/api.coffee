@@ -5,7 +5,6 @@ Utils = require('./utils')
 
 class Api
   LED_STRIP_LENGTH: 15
-  LED_STRIP_PIN: 6
   MOTOR_PIN: 5
 
   constructor: ->
@@ -19,11 +18,10 @@ class Api
       self.motor = new (johnny.Motor)(self.MOTOR_PIN)
 
       self.ledStrip = new (pixel.Strip)(
-        data: self.LED_STRIP_PIN
-        length: self.LED_STRIP_LENGTH
-        color_order: pixel.COLOR_ORDER.GRB
         board: self.board
-        controller: 'FIRMATA'
+        controller: "I2CBACKPACK"
+        color_order: pixel.COLOR_ORDER.GRB
+        strips: [self.LED_STRIP_LENGTH]
         gamma: 2.8
       )
 

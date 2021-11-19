@@ -6,7 +6,9 @@ Utils = require('./utils')
 class Api
   LED_STRIP_FRONT_LENGTH: 10
   LED_STRIP_BACK_LENGTH: 5
-  LED_STRIP_TOTAL_LENGTH: 10 + 5
+  LED_STRIP_OUTER_LENGTH: 10 + 5
+  LED_STRIP_INNER_LENGTH: 6
+  LED_STRIP_TOTAL_LENGTH: 10 + 5 + 6
   MOTOR_PIN: 5
 
   constructor: ->
@@ -23,7 +25,10 @@ class Api
         board: self.board
         controller: "I2CBACKPACK"
         color_order: pixel.COLOR_ORDER.GRB
-        strips: [self.LED_STRIP_TOTAL_LENGTH, self.LED_STRIP_TOTAL_LENGTH]
+        strips: [self.LED_STRIP_OUTER_LENGTH,
+                 self.LED_STRIP_INNER_LENGTH,
+                 self.LED_STRIP_OUTER_LENGTH,
+                 self.LED_STRIP_INNER_LENGTH]
         gamma: 2.8
       )
 
@@ -42,6 +47,9 @@ class Api
 
     if data.led_left?
       @_updateLedStripColors("left", data.led_left)
+
+    if data.led_right? || data.led_left?
+      @ledStrips.show()
 
     if data.vibrate?
       @_startMotor(data.vibrate)
@@ -73,34 +81,44 @@ class Api
     , 150
 
   _updateLedStripColors: (position, colors) ->
-    return if colors.length == 0
+    colorsLength = colors.length
+
+    return if colorsLength == 0
 
     offset = switch position
              when "left" then 0
              when "right" then @LED_STRIP_TOTAL_LENGTH
 
-    if colors.length == 1
+    if colorsLength == 1
       # only one color
       c = Utils.safeColorFromString(colors[0])
       for j in [0...@LED_STRIP_TOTAL_LENGTH]
         @ledStrips.pixel(offset + j).color(c)
     else
-      # more colors, remap color values to led strip size
+      # more colors, remap color values to led strip sizes
       for color, i in colors
-        newPos = Math.floor(Utils.mapRange(i, 0, colors.length, 0, @LED_STRIP_FRONT_LENGTH))
+        newPos = Math.floor(Utils.mapRange(i, 0, colorsLength, 0, @LED_STRIP_FRONT_LENGTH))
 
-        for j in [0...@LED_STRIP_FRONT_LENGTH / colors.length]
+        for j in [0...@LED_STRIP_FRONT_LENGTH / colorsLength]
           c = Utils.safeColorFromString(color)
           @ledStrips.pixel(offset + newPos + j).color(c)
+
+      colorsReversed = colors.reverse()
 
       offset += @LED_STRIP_FRONT_LENGTH
-      for color, i in colors.reverse()
-        newPos = Math.floor(Utils.mapRange(i, 0, colors.length, 0, @LED_STRIP_BACK_LENGTH))
+      for color, i in colorsReversed
+        newPos = Math.floor(Utils.mapRange(i, 0, colorsLength, 0, @LED_STRIP_BACK_LENGTH))
 
-        for j in [0...@LED_STRIP_BACK_LENGTH / colors.length]
+        for j in [0...@LED_STRIP_BACK_LENGTH / colorsLength]
           c = Utils.safeColorFromString(color)
           @ledStrips.pixel(offset + newPos + j).color(c)
 
-    @ledStrips.show()
+      offset += @LED_STRIP_BACK_LENGTH
+      for color, i in colorsReversed
+        newPos = Math.floor(Utils.mapRange(i, 0, colorsLength, 0, @LED_STRIP_INNER_LENGTH))
+
+        for j in [0...@LED_STRIP_INNER_LENGTH / colorsLength]
+          c = Utils.safeColorFromString(color)
+          @ledStrips.pixel(offset + newPos + j).color(c)
 
 module.exports = new Api

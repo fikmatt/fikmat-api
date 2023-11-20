@@ -9,7 +9,8 @@
     "coffeescript": "^2",
     "express": "^4.18",
     "express-rate-limit": "^7.1",
-    "johnny-five": "^2"
+    "johnny-five": "^2",
+    "node-pixel": "github:ScreamZ/node-pixel#patch-1"
   },
   "devDependencies": {
     "nodemon": "^3"

@@ -9,9 +9,8 @@ For now API accepts up to **30 requests per second**, more precisely 1 request p
 
 ```
 # complete request example with curl
-curl -d "{ \"led_left\": [[255,0,0], [0,255,0], [0,0,255]], 
-           \"led_right\": [[255,0,0], [0,255,0], [0,0,255]],
-           \"vibrate\": 100 }" \
+curl -d "{ \"led_left\": [[255,0,0], [0,255,0], [0,0,255]],
+           \"led_right\": [[255,0,0], [0,255,0], [0,0,255]] }" \
      -H "Content-Type: application/json" \
      -X POST http://localhost:8020/api
 ```
@@ -38,21 +37,6 @@ For example array with one value will change color of whole strip, array with 2 
 
 # empty array is ignored
 { led_left: [] }
-```
-## Vibrations
-
-To switch on vibrations, use parameter `vibrate` with number representing intensity of vibration. Value should be between 0 and 99.
-Vibration lasts 150 ms by default. If you need it to last longer, you will have to send the parameter repeatedly.  
-
-```
-# vibrates with maximum power
-{ vibrate: 99 }
-
-# vibrates with half power
-{ vibrate: 49 }
-
-# turns off vibrations
-{ vibrate: 0 }
 ```
 
 ## Wrappers for common game engines

@@ -18,13 +18,15 @@ curl -d "{ \"led_left\": [[255,0,0], [0,255,0], [0,0,255]],
 ## LED strips
 
 Fikmat has two addressable RGB LED strips which can be controlled with parameters `led_right` and `led_left`.  
-Value should be array of colors. Color is defined as array with 3 RGB values (0-255).
+Value should be array of colors. Color can be a string with a hex color code or an array with 3 RGB values (0-255).  
 Number of colors in array can vary, values are remapped to correct count of diodes on the strip.  
-For example array with one value will change color of whole strip, array with 2 colors will change half of strip to first color and second half to second color.  
+For example, an array with one value will change the color of the entire strip, an array with two colors will change half of the strip to the first color and the other half to the second color.  
 
 ```
-# changes whole the left strip to white
+# changes the entire left strip to white
 { led_left: [[255,255,255]] }
+# or with hex code
+{ led_left: ['#ffffff'] }
 
 # changes 1/2 to red and 1/2 to green
 { led_left: [[255,0,0], [0,255,0]] }

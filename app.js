@@ -8,6 +8,8 @@ const http = require('http');
 const server = http.createServer(app);
 const port = process.env.PORT || '8020';
 
+const api = require('./lib/api.js');
+
 app.use(express.json());
 
 const jsonErrorHandler = (err, req, res, next) => {
@@ -26,8 +28,13 @@ app.get('/', (req, res) => {
   res.send('Fikmat API is running.');
 })
 
-require('coffeescript/register');
-const api = require('./lib/api.coffee');
+app.post('/api/control', (req, res) => {
+  debug('api/control', req.body);
+
+  // TODO: send to API
+
+  res.sendStatus(200);
+});
 
 api.on('ready', () => {
   server.listen(port, () => {
@@ -35,10 +42,4 @@ api.on('ready', () => {
   });
 });
 
-app.post('/api', (req, res) => {
-  debug('api', req.body);
-
-  api.post(req.body);
-
-  res.sendStatus(200);
-});
+module.exports = server

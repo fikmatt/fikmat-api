@@ -6,7 +6,6 @@
     "dev": "NODE_ENV=development DEBUG=fikmat-api:* nodemon app.js"
   },
   "dependencies": {
-    "coffeescript": "^2",
     "express": "^4.18",
     "express-rate-limit": "^7.1",
     "johnny-five": "^2",

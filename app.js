@@ -28,10 +28,10 @@ app.get('/', (req, res) => {
   res.send('Fikmat API is running.');
 })
 
-app.post('/api/control', (req, res) => {
-  debug('api/control', req.body);
+app.post('/api', (req, res) => {
+  debug('api request', req.body);
 
-  // TODO: send to API
+  api.update(req.body);
 
   res.sendStatus(200);
 });
